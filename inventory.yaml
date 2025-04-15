@@ -1,0 +1,14 @@
+inventory_parts:
+# Add your inventory items here
+# Example:
+#  - part_id: INV001
+#    description: '10k Resistor, 1/4W, 5%'
+#    value: 10k
+#    package: 0805
+#    footprint: Resistor_SMD:R_0805_2012Metric # Verified Footprint!
+#    footprint_source: manual # Options: manual, api, llm, kit_ingest_verified
+#    mpn: RC0805JR-0710KL
+#    quantity: 50
+#    datasheet_local: null
+#    storage_location: 'Bin X1'
+#    image_path: null 

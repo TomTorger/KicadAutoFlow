@@ -1,0 +1,45 @@
+# KiCad backup files
+*.kicad_sch-bak
+*.kicad_pcb-bak
+*.kicad_pro-bak
+*-bak.*
+*.bak
+
+# KiCad cache and layout settings
+fp-info-cache
+*.kicad_prl
+
+# Python cache and virtual environment
+__pycache__/
+*.pyc
+*.pyo
+venv/
+*.venv/
+env/
+*.env/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# User configuration (contains secrets!)
+config.yaml
+
+# Generated/Downloaded Documentation & Images (often large/binary)
+docs/datasheets/
+docs/inventory_images/
+docs/generated_images/
+docs/Component_Review.md # Optional: track if desired, ignore if strictly generated
+
+# Temporary review libraries (content should be manually moved)
+libs/review/*
+!libs/review/.gitkeep # Keep the directory tracked
+
+# Build and output files
+output/
+gerbers/
+dist/
+build/
+
+# OS specific files
+.DS_Store
+Thumbs.db

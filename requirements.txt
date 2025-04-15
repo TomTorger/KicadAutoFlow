@@ -1,0 +1,19 @@
+# Core
+PyYAML
+requests
+pandas
+jupyterlab
+ipywidgets
+Pillow # For image handling
+PyPDF2 # For PDF text extraction
+
+# Optional LLM/API Clients (Install specific ones needed)
+# openai
+# google-cloud-aiplatform
+
+# Optional KiCad Parsing (Requires careful consideration)
+# kicad-python # or other parsers like sexpdata
+
+# Other utilities
+pathspec # For gitignore style matching if needed
+pydantic # For config/data validation
