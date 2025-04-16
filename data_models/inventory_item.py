@@ -1,7 +1,8 @@
 # data_models/inventory_item.py
-from pydantic import BaseModel, Field, FilePath, field_validator, ConfigDict
-from typing import Optional, Literal, Union
+from pydantic import BaseModel, Field, FilePath, field_validator, model_validator, ConfigDict
+from typing import Optional, Literal, Union, Dict, Any
 from pathlib import Path
+from datetime import datetime
 
 # Reusable path validator (can be moved to utils if used more widely)
 def _validate_relative_path_str(v: Optional[str]) -> Optional[str]:
@@ -20,32 +21,59 @@ class InventoryItem(BaseModel):
     description: str
     value: Optional[str] = None # Can be helpful for passives
     package: Optional[str] = None
-    # Footprint MUST be defined and VERIFIED for inventory items
-    footprint: str = Field(..., description="Verified KiCad Footprint (Lib:Name)")
-    footprint_source: Literal['manual', 'api_verified', 'kit_ingest_verified', 'unknown'] = 'unknown'
+    # Footprint information (optional)
+    footprint: Optional[str] = None
+    footprint_source: Optional[str] = None
     mpn: Optional[str] = None
     quantity: int = 0 # How many are physically available
     storage_location: Optional[str] = None # e.g., "Bin A3"
     datasheet_local: Optional[str] = None # Relative path
     image_path: Optional[str] = None # Relative path
     mounting_type: Optional[str] = None  # 'Surface Mount', 'Through-Hole', or 'Unknown'
+    analysis_confidence: Optional[str] = None  # AI confidence level: "High", "Medium", "Low"
 
     model_config = ConfigDict(validate_assignment=True, extra='ignore')
 
-    @field_validator('part_id', 'footprint', 'description')
+    @model_validator(mode='before')
+    @classmethod
+    def set_default_date(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+        """Set default added_date if not present."""
+        if isinstance(values, dict) and 'added_date' not in values:
+            values['added_date'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        return values
+
+    @field_validator('part_id', 'description')
     @classmethod
     def check_non_empty(cls, v: str, info): # info includes field name
         if not v or not v.strip():
             raise ValueError(f'{info.field_name} cannot be empty')
         return v.strip()
 
-    @field_validator('footprint')
-    @classmethod
-    def check_footprint_format(cls, v: str):
-        if ':' not in v:
-            raise ValueError('Footprint must be in Library:Name format')
-        return v.strip()
-
     # Use the validator for path fields
     validate_datasheet_path = field_validator('datasheet_local', mode='before')(_validate_relative_path_str)
     validate_image_path = field_validator('image_path', mode='before')(_validate_relative_path_str)
+
+    def pretty_print(self) -> str:
+        """Format component information for nice display."""
+        output = []
+        output.append(f"Component ID: {self.part_id}")
+        output.append(f"Description:  {self.description}")
+        output.append(f"Value:        {self.value}")
+        output.append(f"Package:      {self.package}")
+        output.append(f"Footprint:    {self.footprint}")
+        output.append(f"Mounting:     {self.mounting_type}")
+        output.append(f"Quantity:     {self.quantity}")
+        
+        if self.mpn:
+            output.append(f"MPN:          {self.mpn}")
+        if self.storage_location:
+            output.append(f"Storage:      {self.storage_location}")
+        if self.analysis_confidence:
+            output.append(f"AI Confidence: {self.analysis_confidence}")
+            
+        return "\n".join(output)
+
+    def __str__(self) -> str:
+        """String representation of the inventory item."""
+        return self.pretty_print()
+        return f"{self.part_id}: {self.description} {self.value} ({self.package}) - Qty: {self.quantity}"

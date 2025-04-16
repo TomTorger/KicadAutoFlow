@@ -118,3 +118,15 @@ class Component(BaseModel):
              # Ensure existing dict if not present
              if self.extracted_params is None: self.extracted_params = {}
              self.extracted_params['parsed_pin_count'] = data.pin_count
+    
+    def pretty_print(self) -> str:
+        """Format component information for nice display."""
+        output = []
+        output.append(f"Component ID: {self.ref}")
+        output.append(f"Description:  {self.description}")
+        output.append(f"Value:       {self.value}")
+        output.append(f"Footprint:   {self.footprint}")
+        output.append(f"MPN:        {self.mpn}")
+        output.append(f"Datasheet:   {self.datasheet_url or self.datasheet_local}")
+        output.append(f"Status:      {self.status.json()}")
+        return "\n".join(output)
