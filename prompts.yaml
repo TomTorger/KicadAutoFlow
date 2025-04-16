@@ -15,12 +15,15 @@ suggest_footprint: |
 
 # Analyzes component image (for LMMs like Gemini Vision)
 analyze_component_image: |
-  Carefully analyze the primary electronic component shown in the image. Extract the following information. Respond ONLY with a single JSON object containing these exact keys:
+  Carefully analyze the primary electronic component shown in the image. Extract the following information and attempt to find a footprint. Respond ONLY with a single JSON object containing these exact keys:
   {{
     "detected_text": "string or null (Concise summary of all distinct text markings)",
     "component_type_guess": "string or null (Best guess: Resistor, Capacitor, IC, Transistor, Diode, LED, Connector, Inductor)",
     "package_guess": "string or null (Best guess: 0805, SOT-23, SOIC-8, DIP-16, TQFP-100, TO-92, etc.)",
     "value_guess": "string or null (Best guess based on markings/type: 10k, 100nF, NE555, 1N4148, etc.)",
+    "mounting_type": "string or null (Surface Mount, Through-Hole, or Unknown)",
+    "quantity": "integer (Best guess for quantity, e.g., 1, 2, 4, etc.. Please look for hints in the picture as to how many of the part you would say it indicates)",
+    "footprint_suggestion": "string or null (Best guess for a standard KiCad 7+ footprint name, e.g., Resistor_SMD:R_0805_2012Metric, or None)",
     "confidence": "string (Your confidence in these guesses: High, Medium, or Low)"
   }}
   Focus on the most prominent component. Use null if information cannot be determined.

@@ -28,6 +28,7 @@ class InventoryItem(BaseModel):
     storage_location: Optional[str] = None # e.g., "Bin A3"
     datasheet_local: Optional[str] = None # Relative path
     image_path: Optional[str] = None # Relative path
+    mounting_type: Optional[str] = None  # 'Surface Mount', 'Through-Hole', or 'Unknown'
 
     model_config = ConfigDict(validate_assignment=True, extra='ignore')
 
