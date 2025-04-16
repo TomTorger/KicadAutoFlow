@@ -1,14 +1,3 @@
-# KiCad backup files
-*.kicad_sch-bak
-*.kicad_pcb-bak
-*.kicad_pro-bak
-*-bak.*
-*.bak
-
-# KiCad cache and layout settings
-fp-info-cache
-*.kicad_prl
-
 # Python cache and virtual environment
 __pycache__/
 *.pyc
@@ -25,10 +14,11 @@ env/
 config.yaml
 
 # Generated/Downloaded Documentation & Images (often large/binary)
+# Make a conscious choice whether to track these or not
 docs/datasheets/
 docs/inventory_images/
 docs/generated_images/
-docs/Component_Review.md # Optional: track if desired, ignore if strictly generated
+# docs/Component_Review.md
 
 # Temporary review libraries (content should be manually moved)
 libs/review/*
@@ -39,6 +29,15 @@ output/
 gerbers/
 dist/
 build/
+
+# KiCad backup files & layout settings
+*.kicad_sch-bak
+*.kicad_pcb-bak
+*.kicad_pro-bak
+*-bak.*
+*.bak
+*.kicad_prl
+fp-info-cache
 
 # OS specific files
 .DS_Store

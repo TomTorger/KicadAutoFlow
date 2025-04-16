@@ -3,50 +3,48 @@
 # API Keys (Keep secret!)
 api_keys:
   openai: "YOUR_OPENAI_API_KEY"
-  google_ai: "YOUR_GOOGLE_AI_API_KEY"
+  google_ai: "YOUR_GOOGLE_AI_API_KEY" # Needed for GeminiCapability
   snapeda: "YOUR_SNAPEDA_API_KEY_IF_ANY"
-  # Add other API keys as needed
 
-# File Paths (Relative to project root or absolute)
-# Example: Adjust based on your KiCad installation if needed
+# File Paths
 kicad_paths:
-  standard_symbol_libs:
-    - "/usr/share/kicad/symbols" # Linux example
-    # - "/Applications/KiCad/KiCad.app/Contents/SharedSupport/symbols" # macOS example
-    # - "C:/Program Files/KiCad/7.0/share/kicad/symbols" # Windows example
-  standard_footprint_libs:
-    - "/usr/share/kicad/footprints" # Linux example
-    # - "/Applications/KiCad/KiCad.app/Contents/SharedSupport/footprints" # macOS example
-    # - "C:/Program Files/KiCad/7.0/share/kicad/footprints" # Windows example
+  standard_symbol_libs: [] # Add paths like "/usr/share/kicad/symbols"
+  standard_footprint_libs: [] # Add paths like "/usr/share/kicad/footprints"
+
+prompts_file: "prompts.yaml" # Path to the prompts definition file (relative to repo root)
 
 # Health Score Rules (Example - Adjust weights as desired)
 health_rules:
   points:
     datasheet_local: 1.0
     datasheet_url: 0.5
-    footprint_project_manual: 2.0    # Manually verified in project lib
-    footprint_project_apiverified: 1.8 # API downloaded & user accepted
-    footprint_project_inventory: 1.5  # From inventory, manually verified there
-    footprint_kicad_lib: 1.0          # Standard KiCad lib
-    footprint_inventory_api: 0.8      # From inventory, originally API sourced
-    footprint_inventory_llm: 0.3      # From inventory, originally LLM suggested
-    footprint_bom_apireview: 0.2      # API download pending review
-    footprint_bom_llmsuggest: 0.1     # LLM suggested, needs verification
-    symbol_project_lib: 1.0           # Found in project symbol lib
-    symbol_kicad_lib: 0.5             # Found in standard KiCad lib (heuristic)
+    footprint_project_manual: 2.0
+    footprint_project_apiverified: 1.8
+    footprint_project_inventory: 1.5
+    footprint_kicad_lib: 1.0
+    footprint_inventory_api: 0.8
+    footprint_inventory_llm: 0.3
+    footprint_bom_apireview: 0.2
+    footprint_bom_llmsuggest: 0.1
+    footprint_parsed_ok: 0.2       # Added in Iteration 3
+    symbol_definition_found: 1.0   # Added in Iteration 3
+    symbol_library_found: 0.2      # Added in Iteration 3
     mpn_exists: 0.5
-    # llm_doc_check_ok: 0.5             # Optional experimental checks
+    # llm_doc_check_ok: 0.5        # Optional points for LLM checks passing
     # lmm_footprint_check_ok: 0.5
 
   thresholds:
-    needs_review_below: 4.0 # Example threshold
+    needs_review_below: 4.0
 
 # LLM Configuration
 llm_settings:
-  default_provider: "openai" # or "google_ai"
-  default_text_model: "gpt-4"
-  default_vision_model: "gpt-4-vision-preview"
-  # Add model-specific settings if needed
+  default_provider: "google_ai" # Defaulting to Gemini as it integrates with ADK potentially
+  default_text_model: "gemini-1.5-flash-latest" # Or other appropriate Gemini model
+  default_vision_model: "gemini-1.5-flash-latest" # Use multimodal model
+  # Add model-specific settings if needed (e.g., temperature for specific tasks)
+  # gemini_generation_config:
+  #   temperature: 0.2
+  #   candidate_count: 1
 
 # Other settings
 defaults:

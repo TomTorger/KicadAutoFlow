@@ -1,98 +1,93 @@
-# KicadAutoFlow
+# KicadAutoFlow (ADK Based)
 
-**(Formerly KicadDesignAssistant)**
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+<!-- Add other badges if desired: build status, code coverage, etc. -->
 
-A **Jupyter Notebook-driven framework** designed to assist and streamline your KiCad project workflow. It emphasizes **inventory management, automated component verification, structured review, and optional AI assistance**, bridging the gap between your parts bin and a layout-ready KiCad project.
+A **Jupyter Notebook-driven framework powered by Google's Agent Development Kit (ADK)** designed to assist and streamline your KiCad project workflow. It emphasizes **inventory management, automated component verification, structured review, and optional AI assistance**, bridging the gap between your parts bin and a layout-ready KiCad project.
 
-## Core Philosophy
+## Core Philosophy: Semi-Automation & User Control
 
-This framework embraces **semi-automation**. It automates tedious data gathering (datasheets, initial footprint/symbol searches) and analysis (health scores, basic checks) but fundamentally relies on **your expertise and verification** for critical design decisions, final asset validation (especially footprints!), and the creative processes of schematic capture and PCB layout. Treat all automated outputs (API results, LLM suggestions) as *aids requiring confirmation*, not infallible truth.
+This framework automates tedious tasks but relies on **your expertise for critical verification and design**.
+*   **Automation:** Handles searching libraries/APIs for assets (symbols, footprints, datasheets), downloading files, performing initial consistency checks (using `kiutils` and optional AI), calculating health scores, and generating reports.
+*   **User Control:** You make the final design decisions, **critically review and verify all footprints** (especially those from external sources), manage your inventory accuracy, create the schematic logic, and perform the PCB layout.
+*   **AI as Assistant:** LLM/LMM features are aids for suggestion and basic checks, not infallible oracles. Always apply engineering judgment.
 
 ## Key Features
 
-*   **Inventory-Aware Design:** Manage local component stock (`inventory.yaml`) with image-assisted ingestion and prioritize using available parts.
-*   **Reusable Schematic Blocks:** Define and reuse common circuit blocks (`libs/blocks/`) via KiCad's hierarchy.
-*   **Automated Asset Checking:** Verifies datasheets, symbols, and footprints against project/KiCad libraries and external APIs (e.g., SnapEDA), downloading assets to a review queue.
-*   **Component Health Score:** Provides a quantifiable measure of each BoM component's verification status, guiding review efforts.
-*   **LLM/LMM Assistance (Experimental):** Optional AI features for:
-    *   Suggesting circuit blocks, inventory parts, standard footprints.
-    *   Assisting inventory ingestion via image analysis (OCR/LMM).
-    *   Performing basic datasheet consistency checks.
-    *   *Requires careful configuration, prompt engineering, and critical evaluation of results.*
-*   **Structured Jupyter Workflow:** Guides the process through distinct phases via dedicated notebooks (Inventory, Design Exploration, Verification/Handoff).
-*   **Comprehensive Markdown Documentation:** Generates a `Component_Review.md` file per project, summarizing component details, verification results, images, health scores, and providing an actionable checklist for manual review.
+*   **Inventory-Aware Design:** Manage local parts in `inventory.yaml`, including image-assisted ingestion. Workflow prioritizes using these verified parts.
+*   **Modular ADK Backend:** Logic organized into reusable ADK **Agents** (orchestrators like `VerificationAgent`), **Tools** (atomic actions like `CheckLibraryAssetTool`, `DownloadDatasheetTool`), and **Capabilities** (standardized interfaces to external services like `LLMCapability`, `FootprintAPICapability`).
+*   **Comprehensive Asset Checking:** Verifies datasheets, symbols (via `kiutils`), and footprints (via `kiutils`) against project libraries, KiCad standard libraries, and external APIs (e.g., SnapEDA capability). Downloads assets to `libs/review/`.
+*   **Component Health Score:** Quantifies the verification status (datasheet presence/validity, footprint existence/parsing/verification, symbol definition found, MPN presence) guiding review focus.
+*   **Optional LLM/LMM Assistance:** Integrates AI for suggesting components/footprints, analyzing images for inventory, and experimental datasheet/footprint consistency checks.
+*   **Structured Jupyter Workflow:** Manages the process via distinct notebooks: `1_Inventory_Management.ipynb`, `2_Project_Design_Exploration.ipynb`, `3_Project_Verification_and_Handoff.ipynb`.
+*   **Actionable Markdown Documentation:** Generates `docs/Component_Review.md` per project, summarizing component data, verification results, health scores, images, and a checklist for required manual review actions.
+*   **Reusable Blocks:** Supports using pre-verified hierarchical sheets stored in `libs/blocks/`.
+*   **Offline Testing Framework:** Includes `pytest` structure for testing core logic without live API calls.
 
 ## Prerequisites
 
-*   **Python:** 3.8+ (with `pip` and `venv`)
-*   **KiCad:** 7.0+ (Standard libraries should be installed and paths correctly set in `config.yaml`).
-*   **Git:** For version control of the template and your projects.
-*   **JupyterLab/Notebook:** The primary user interface (`pip install jupyterlab`).
-*   **(Optional but Recommended) API Keys:** For services you wish to use (e.g., OpenAI/Google AI for LLM features, SnapEDA for footprint downloads).
+*   **Python:** 3.9+ Recommended (due to ADK/modern library dependencies)
+*   **KiCad:** 7.0+ (Standard libraries installed, paths set in `config.yaml`).
+*   **Git:** For version control.
+*   **JupyterLab:** Recommended interface (`pip install jupyterlab`).
+*   **Python Dependencies:** Install via `pip install -r requirements.txt`. Key deps: `google-adk`, `PyYAML`, `requests`, `pandas`, `ipywidgets`, `Pillow`, `PyPDF2`, `kiutils`, `pydantic`, `pytest`, `pytest-mock`.
+*   **(Optional) API Keys:** For external services used by capabilities (e.g., Google AI for Gemini, SnapEDA). Add to `config.yaml`.
+*   **(Optional) Footprint Renderer:** An external tool (like `pcbdraw` or potentially `kicad-cli` export) configured in `utils/render_footprint_util.py` is needed for LMM visual checks.
 
 ## Quick Start
 
-1.  Clone repo, `cd KicadAutoFlow`.
-2.  Copy `config.yaml.template` -> `config.yaml`. **Edit `config.yaml`** to set KiCad paths (if non-standard) and any API keys you have.
-3.  `python -m venv venv`
-4.  `source venv/bin/activate` (or `.\venv\Scripts\activate` on Windows)
-5.  `pip install -r requirements.txt`
-6.  `jupyter lab`
-7.  Open `1_Inventory_Management.ipynb` and explore/add some parts (try the image ingestor!).
-8.  Open `2_Project_Design_Exploration.ipynb`, define a simple goal, and generate an initial `bom.yaml` for the example project.
-9.  *Proceed to KiCad to create a basic schematic based on the BoM.*
-10. *Export BoM from KiCad.*
-11. Open `3_Project_Verification_and_Handoff.ipynb`, load the exported BoM, and run the verification loop. Explore the reports and generated documentation.
+1.  **Clone & Setup:**
+    ```bash
+    git clone <repo_url> KicadAutoFlow
+    cd KicadAutoFlow
+    cp config.yaml.template config.yaml
+    # EDIT config.yaml: Set KiCad paths, add API keys (optional)
+    python -m venv venv
+    source venv/bin/activate  # Or .\venv\Scripts\activate on Windows
+    pip install -r requirements.txt
+    jupyter lab
+    ```
+2.  **Inventory:** Open `1_Inventory_Management.ipynb`. Add a few common parts you have (e.g., resistors, caps), **ensuring you provide the correct, existing KiCad footprint**. Try the image ingestor.
+3.  **Design Exploration:** Open `2_Project_Design_Exploration.ipynb`. Define a simple goal (e.g., "Blink an LED with ESP32"). Let the LLM suggest parts (it should prioritize your inventory). Generate the initial `MyExampleKiCadProject/bom.yaml`.
+4.  **KiCad Schematic:** Open `MyExampleKiCadProject/` in KiCad. Create a simple schematic based on the generated BoM. Add power flags. Annotate, ERC check, Save. **Export BoM** (CSV or XML) to the project folder (e.g., `MyExampleKiCadProject/MyExampleKiCadProject-bom.csv`).
+5.  **Verification:** Open `3_Project_Verification_and_Handoff.ipynb`. Update the `KICAD_BOM_EXPORT_FILENAME`. Run the cells to load the BoM, run verification, review health scores, generate the Markdown report, and prep data for KiCad fields.
+6.  **Review:** Open `docs/Component_Review.md`. Check the details and action items.
+7.  **(Optional) KiCad Fields:** Go back to Eeschema, use `Tools -> Edit Symbol Fields` and paste the generated data.
 
 ## Setup Instructions
 
-*(Detailed steps, same as Iteration 2 - included for completeness)*
-
-1.  **Clone/Copy:** Get a copy of this template repository.
-2.  **Initialize Git:** `git init` (if starting fresh).
-3.  **Configuration:**
-    *   Copy `config.yaml.template` to `config.yaml`.
-    *   **Edit `config.yaml`:** Add your **API keys** (this file is gitignored - keep secrets safe!). Adjust KiCad standard library paths if needed. Review health score rules & LLM settings.
-4.  **Python Environment:**
-    *   Create: `python -m venv venv`
-    *   Activate: `source venv/bin/activate` (Linux/macOS) or `.\venv\Scripts\activate` (Windows Git Bash/PowerShell)
-5.  **Install Dependencies:** `pip install -r requirements.txt`
-6.  **Start Jupyter:** `jupyter lab` (or `jupyter notebook`) in the repository root.
+*(Detailed steps - same as Iteration 2)*
 
 ## Workflow Overview
 
-*(Detailed steps, same as Iteration 2 - included for completeness)*
+*(Detailed multi-notebook steps - same as Iteration 2, emphasizing KiCad export/import)*
 
-1.  **`1_Inventory_Management.ipynb` (Ongoing):** Manage `inventory.yaml`. Add parts via image/manual entry. **Crucially verify footprints during ingestion.**
-2.  **`2_Project_Design_Exploration.ipynb` (Project Start):** Define goal, review inventory/blocks, use LLM assist, generate initial project `bom.yaml`.
-3.  **Manual KiCad Schematic Design:** Create hierarchical schematic in **Eeschema**. Use library blocks & BoM components. Assign footprints, wire, ERC, annotate. **Export BoM** (CSV/XML).
-4.  **`3_Project_Verification_and_Handoff.ipynb` (Post-Schematic):** Load KiCad BoM. Run **Verification Loop** (Checks, Scores, API Downloads, Optional LLM checks). **Interactively accept reviewed assets**. Resolve missing/low-score items. Save canonical project `bom.yaml`. Generate `Component_Review.md`. Perform **focused manual review** using Markdown doc. Generate final pre-layout data.
-5.  **Manual KiCad PCB Layout:** Open **Pcbnew**, update from schematic, place, route, DRC.
+## Project Structure Explained
 
-## Key Files & Directories
-
-*(Detailed structure, same as Iteration 2 - included for completeness)*
-
-*   `config.yaml`: **(Untracked)** User secrets, paths, settings.
-*   `inventory.yaml`: **(Tracked)** User component inventory database.
-*   `requirements.txt`: Python dependencies.
-*   `scripts/`: Backend Python logic (OO structure).
-*   `libs/`: Project KiCad libs (symbols, footprints, blocks, review queue).
-*   `docs/`: Generated docs (Component Review MD), downloaded datasheets.
-*   `*.ipynb`: Jupyter Notebook workflow interface.
-*   `<project_name>/`: KiCad project files + canonical `bom.yaml`.
+*   **`adk_agents/`:** Contains ADK Agent classes orchestrating workflows (e.g., `VerificationAgent`).
+*   **`adk_tools/`:** Contains ADK Tool classes/functions performing specific actions (e.g., `CheckLibraryAssetTool`, `DownloadDatasheetTool`). These are called by Agents.
+*   **`adk_capabilities/`:** Python classes providing standardized interfaces to external services (e.g., `LLMCapability`, `FootprintAPICapability`). Used by Tools.
+*   **`data_models/`:** Pydantic classes defining core data structures (`Component`, `InventoryItem`, `HealthScore`, etc.).
+*   **`utils/`:** Shared Python helper functions/classes not specific to ADK structure (Config loading, KiCad file parsing (`kiutils`), file downloading, health calculation logic).
+*   **`libs/`:** Project-level KiCad assets managed by Git:
+    *   `symbols.kicad_sym`: Custom/verified symbols.
+    *   `footprints.pretty/`: Custom/verified footprints.
+    *   `blocks/`: Reusable `.kicad_sch` files.
+    *   `review/`: **(Gitignored Content)** Temporary holding for API-downloaded assets awaiting user verification.
+*   **`docs/`:** **(Gitignored Content)** Generated output (`Component_Review.md`), downloaded datasheets, inventory images, rendered footprints.
+*   **`*.ipynb`:** Jupyter Notebooks providing the user interface to the workflow.
+*   **`<project_name>/`:** Folder for your specific KiCad project (`.kicad_pro`, `.kicad_sch`, `.kicad_pcb`) and its **canonical `bom.yaml`** (updated by Notebook 3).
+*   `inventory.yaml`: **(Tracked)** The central database of your physical component inventory. Accuracy is key.
+*   `config.yaml`: **(Gitignored)** Your local configuration (API keys, paths).
+*   `tests/`: Offline tests using `pytest` and `pytest-mock`.
 
 ## Important Considerations
 
-*   **API Client Implementation:** You **must** implement the actual API interaction logic in the placeholder files within `scripts/utils/` (e.g., `openai_client.py`, `snapeda_client.py`) for those features to work.
-*   **Footprint Renderer:** LMM visual checks require a functioning `scripts/render_footprint.py`. This is complex and may need external tools. Treat LMM results as highly experimental.
-*   **Verification is CRITICAL:** Automation assists, but **you** are responsible for validating downloaded assets (especially footprints), reviewing LLM outputs, and ensuring the final design correctness before layout and fabrication. Use the Health Scores and `Component_Review.md` to guide this process.
-*   **LLM Limitations:** Understand that LLMs can hallucinate or misinterpret technical data. Double-check their suggestions and verification results.
+*(Warnings - same as Iteration 2, reinforcing verification)*
 
 ## Contributing (Optional)
 
-*(Add guidelines if you want others to contribute)*
-We welcome contributions! Please follow standard Fork & Pull Request workflows. Ensure code includes docstrings and ideally unit tests for new functionality.
+*(Placeholder for contribution guidelines)*
 
 ## License
 

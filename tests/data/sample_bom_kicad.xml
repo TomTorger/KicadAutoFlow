@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<export><components>
+<comp ref="U1"><value>NE555</value><footprint>DIP-8</footprint><datasheet>~</datasheet></comp>
+</components></export>

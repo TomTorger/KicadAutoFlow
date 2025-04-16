@@ -1,0 +1,61 @@
+# Prompts used by the LLMCapability
+
+# Suggests KiCad Footprint based on package/description
+suggest_footprint: |
+  Given the following component details:
+  Description: "{component_desc}"
+  Package Info: "{package_desc}"
+
+  Suggest ONE standard KiCad 7+ footprint name in the precise format 'LibraryName:FootprintName'.
+  Common Library Examples: Resistor_SMD, Capacitor_SMD, Package_SO, Package_DIP, Connector_PinHeader_2.54mm, LED_SMD, Diode_SMD, Package_TO_SOT_SMD.
+  Footprint Name Examples: R_0805_2012Metric, C_0603_1608Metric, SOIC-8_3.9x4.9mm_P1.27mm, PinHeader_1x03_P2.54mm_Vertical.
+  If the package info is ambiguous or you are unsure of a standard KiCad footprint, return only the word 'None'.
+
+# Analyzes component image (for LMMs like Gemini Vision)
+analyze_component_image: |
+  Analyze the primary electronic component shown in the image. Provide the following information in a JSON block:
+  {
+    "detected_text": "Extracted text markings (or null)",
+    "component_type_guess": "Best guess for component type (e.g., Resistor, Capacitor, IC, Transistor, Diode, LED, Connector, Inductor) (or null)",
+    "package_guess": "Best guess for package type (e.g., 0805, SOT-23, SOIC-8, DIP-16, TQFP-100) (or null)",
+    "value_guess": "Best guess for value based on markings/type (e.g., 10k, 100nF, NE555) (or null)"
+  }
+  Focus on the most prominent component if multiple are visible.
+
+# Checks datasheet text for pin count consistency
+check_pin_count: |
+  Datasheet Text Snippet:
+  ---
+  {datasheet_text_snippet}
+  ---
+  Expected Component Info:
+  Package: {package}
+  Value/Description: {value_desc}
+  Expected Pin Count (from footprint): {expected_pin_count}
+
+  Does the datasheet text snippet EXPLICITLY mention or strongly imply a pin count that MATCHES the expected pin count ({expected_pin_count}) for this component?
+  Respond ONLY with a JSON object containing:
+  {
+    "match": boolean (true if match, false if mismatch, null if uncertain/not mentioned),
+    "datasheet_pin_count": integer (pin count found in text, or null),
+    "notes": "Brief explanation (e.g., 'Text mentions 8 pins, matches expectation.', 'Text mentions 16 pins, mismatch.', 'Pin count not found.')"
+  }
+
+# Checks datasheet text for package consistency
+check_package_match: |
+  Datasheet Text Snippet:
+  ---
+  {datasheet_text_snippet}
+  ---
+  Expected Component Info:
+  Package: {package}
+  Value/Description: {value_desc}
+
+  Does the datasheet text snippet EXPLICITLY mention or describe a package name or type that is reasonably CONSISTENT with the expected package '{package}'? (Consider variations like SOIC-8 vs SO-8 vs SOIC_8).
+  Respond ONLY with a JSON object containing:
+  {
+    "match": boolean (true if consistent, false if clear mismatch, null if uncertain/not mentioned),
+    "datasheet_package": string (package name found in text, or null),
+    "notes": "Brief explanation (e.g., 'Text mentions SO-8, consistent.', 'Text mentions DIP-16, mismatch.', 'Package name not found.')"
+  }
+
